@@ -73,7 +73,7 @@ class String {
     comp_ = (1.f - dampC_) / dampC_;
   }
   // sqrt(1 - g): keeps the ringing energy roughly constant across RING times.
-  float excitation() const { return __builtin_sqrtf(1.f - gain_); }
+  float excitation() const { return fsqrt(1.f - gain_); }
 
   // Slow detune drift, updated once per block (it moves far slower than that).
   void beginBlock(float detuneCents, uint32_t frames) {

@@ -42,5 +42,5 @@ ULIBS  = -lm
 # Macros
 #
 
-UDEFS = 
+UDEFS = -fno-math-errno
 

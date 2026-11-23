@@ -14,7 +14,7 @@ const __unit_header genericfx_unit_header_t unit_header = {
     .api = UNIT_API_VERSION,
     .dev_id = 0x48464850U,   // 'HFHP' — Hi-Fi Hopes
     .unit_id = 0x00000002U,  // Sympathetic Strings
-    .version = 0x00010001U,  // 1.0.1
+    .version = 0x00010002U,  // 1.0.2
     .name = "Sympathetic Strings",
     .num_params = 8,
 

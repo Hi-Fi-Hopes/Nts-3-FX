@@ -106,11 +106,24 @@ inline float softLimit(float x) {
   return x < 0.f ? -y : y;
 }
 
+// Square root. On the NTS-3 this is the single VSQRT instruction. Never call
+// sqrtf(): it links libm's errno wrapper, which drags in abort/unwind code
+// the NTS-3 can't resolve ("ELF error: Resolve Symbol" in the editor).
+inline float fsqrt(float x) {
+  if (x <= 0.f) return 0.f;
+#if defined(__arm__) && defined(__ARM_FP)
+  float r;
+  __asm__("vsqrt.f32 %0, %1" : "=t"(r) : "t"(x));
+  return r;
+#else
+  return __builtin_sqrtf(x);
+#endif
+}
+
 // Equal-power crossfade. mix 0 = all dry, 1 = all wet.
 inline void equalPowerGains(float mix, float &dry, float &wet) {
-  // sqrt is a single FPU instruction on the Cortex-M7.
-  wet = __builtin_sqrtf(clampf(mix, 0.f, 1.f));
-  dry = __builtin_sqrtf(1.f - clampf(mix, 0.f, 1.f));
+  wet = fsqrt(clampf(mix, 0.f, 1.f));
+  dry = fsqrt(1.f - clampf(mix, 0.f, 1.f));
 }
 
 // Map 0..1 exponentially between lo and hi (both > 0): for times and frequencies,

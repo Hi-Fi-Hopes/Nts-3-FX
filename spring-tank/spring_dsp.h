@@ -152,8 +152,16 @@ class SpringTank {
 
     // Block-rate targets, smoothed per sample to avoid zipper noise.
     const float driveT = 1.f + dwell_ * (ch.driveMax - 1.f);
-    const float wetT = sqrtf(mix_);        // equal-power crossfade
-    const float dryT = sqrtf(1.f - mix_);
+    // Equal-power crossfade. VSQRT on the NTS-3; never libm's sqrtf (see fsqrt in hfh_math.h).
+#if defined(__arm__) && defined(__ARM_FP)
+    float wetT, dryT;
+    { const float a = mix_, b = 1.f - mix_;
+      __asm__("vsqrt.f32 %0, %1" : "=t"(wetT) : "t"(a));
+      __asm__("vsqrt.f32 %0, %1" : "=t"(dryT) : "t"(b)); }
+#else
+    const float wetT = __builtin_sqrtf(mix_);
+    const float dryT = __builtin_sqrtf(1.f - mix_);
+#endif
     const float sm = 0.002f;
 
     const int n = numSprings_;

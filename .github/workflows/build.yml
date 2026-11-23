@@ -87,6 +87,11 @@ jobs:
             cp logue-sdk/platform/nts-3_kaoss/dummy-genericfx/Makefile "$dst/"
             make -C "$dst" GCC_BIN_PATH="$GCC_BIN"
             make -C "$dst" install GCC_BIN_PATH="$GCC_BIN"
+            # The NTS-3 resolves only a few runtime symbols. Anything left
+            # undefined (e.g. libm's sqrtf pulling in abort/unwind code) makes
+            # the editor fail with "ELF error: Resolve Symbol".
+            und=$("$GCC_BIN/arm-none-eabi-readelf" --dyn-syms -W "$dst"/build/*.elf | awk '$7=="UND" && $8!="" {print $8}' | sort -u)
+            if [ -n "$und" ]; then echo "::error::$unit has unresolved symbols: $und"; exit 1; fi
             for f in "$dst"/*.nts3unit; do
               "$GCC_BIN/arm-none-eabi-size" "$f"
               size=$(stat -c%s "$f")
