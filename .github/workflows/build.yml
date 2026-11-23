@@ -44,9 +44,21 @@ jobs:
           mkdir -p arm-gcc
           curl -sSL "$GCC_URL" | tar xz -C arm-gcc --strip-components=1
 
+      - name: Core library tests
+        run: |
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror -I core/hfh tools/test_core.cc -o test_core
+          ./test_core
+
+      - name: Core library ARM compile check (NTS-3 flags)
+        run: |
+          arm-gcc/bin/arm-none-eabi-g++ -std=c++11 -fPIC -mcpu=cortex-m7 -mthumb -mfloat-abi=hard \
+            -mfpu=fpv4-sp-d16 -fsingle-precision-constant -Os -fno-exceptions -fno-rtti -fno-use-cxa-atexit \
+            -Wall -Wextra -Wdouble-promotion -Werror -I core/hfh -c tools/arm_smoke.cc -o arm_smoke.o
+          arm-gcc/bin/arm-none-eabi-size arm_smoke.o
+
       - name: Desktop DSP test (renders demo WAVs)
         run: |
-          g++ -O2 -std=c++17 -Wall -Wextra -Werror -I spring-tank tools/render_demo.cc -o render_demo
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror -I spring-tank -I core/hfh tools/render_demo.cc -o render_demo
           mkdir -p demo
           ./render_demo demo | tee demo/report.txt
           ! grep -q "NaN" demo/report.txt
@@ -56,6 +68,9 @@ jobs:
           set -e
           mkdir -p dist
           GCC_BIN="$PWD/arm-gcc/bin"
+          # Shared library, reachable from each unit as ../hfh-core
+          rm -rf logue-sdk/platform/nts-3_kaoss/hfh-core
+          cp -r core/hfh logue-sdk/platform/nts-3_kaoss/hfh-core
           for hdr in */header.c; do
             unit=$(dirname "$hdr")
             dst="logue-sdk/platform/nts-3_kaoss/$unit"

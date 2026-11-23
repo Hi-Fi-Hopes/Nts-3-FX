@@ -46,6 +46,7 @@ The CI run uploads these as the **demo-audio** artifact.
 - `<effect>/effect.h`: maps NTS-3 parameters and touches onto the DSP
 - `<effect>/unit.cc`, `config.mk`: Korg's template glue
 - `<effect>/*_dsp.h`: the DSP itself, with no SDK dependencies
+- `core/hfh/`: the shared HFH core DSP library (see `core/README.md`)
 - The Makefile comes from Korg's template at build time.
 
 Developer ID `0x48464850` ('HFHP'). Unit IDs: 1 = Spring Tank.
