@@ -44,6 +44,9 @@ jobs:
           mkdir -p arm-gcc
           curl -sSL "$GCC_URL" | tar xz -C arm-gcc --strip-components=1
 
+      - name: Validate unit headers (rules the KORG KONTROL Editor enforces)
+        run: python3 tools/check_headers.py
+
       - name: Core library tests
         run: |
           g++ -O2 -std=c++17 -Wall -Wextra -Werror -I core/hfh tools/test_core.cc -o test_core

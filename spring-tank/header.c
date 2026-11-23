@@ -14,19 +14,19 @@ const __unit_header genericfx_unit_header_t unit_header = {
     .api = UNIT_API_VERSION,
     .dev_id = 0x48464850U,   // 'HFHP' — Hi-Fi Hopes
     .unit_id = 0x00000001U,  // Spring Tank
-    .version = 0x00010000U,  // 1.0.0
+    .version = 0x00010001U,  // 1.0.1
     .name = "Spring Tank",
     .num_params = 8,
 
     .params = {
-      // min, max, center, default, type, frac, frac mode, reserved, name
+      // min, max, center (= min for unipolar, per Korg), default, type, frac, frac mode, reserved, name
       // Percent parameters run 0..1000 with one decimal: 0.0 .. 100.0 %
       {0, 1000, 0, 400, k_unit_param_type_percent, 1, 1, 0, {"DWELL"}},
       {0, 1000, 0, 500, k_unit_param_type_percent, 1, 1, 0, {"MIX"}},
       {0, 1000, 0, 450, k_unit_param_type_percent, 1, 1, 0, {"DECAY"}},
       {0, 1000, 0, 500, k_unit_param_type_percent, 1, 1, 0, {"TONE"}},
       {0, 1000, 0, 550, k_unit_param_type_percent, 1, 1, 0, {"DRIP"}},
-      {2, 3, 0, 3, k_unit_param_type_none, 0, 0, 0, {"SPRINGS"}},
+      {2, 3, 2, 3, k_unit_param_type_none, 0, 0, 0, {"SPRINGS"}},
       {0, 1, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"CHARACTER"}},
       {0, 1, 0, 1, k_unit_param_type_onoff, 0, 0, 0, {"CRASH"}},
     },

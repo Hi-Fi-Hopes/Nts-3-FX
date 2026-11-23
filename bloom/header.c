@@ -14,19 +14,19 @@ const __unit_header genericfx_unit_header_t unit_header = {
     .api = UNIT_API_VERSION,
     .dev_id = 0x48464850U,   // 'HFHP' — Hi-Fi Hopes
     .unit_id = 0x00000003U,  // Bloom
-    .version = 0x00010000U,  // 1.0.0
+    .version = 0x00010001U,  // 1.0.1
     .name = "Bloom",
     .num_params = 8,
 
     .params = {
-      // min, max, center, default, type, frac, frac mode, reserved, name
-      {20, 4000, 0, 800, k_unit_param_type_msec, 0, 0, 0, {"SWELL"}},
+      // min, max, center (= min for unipolar, per Korg), default, type, frac, frac mode, reserved, name
+      {20, 4000, 20, 800, k_unit_param_type_msec, 0, 0, 0, {"SWELL"}},
       {0, 1000, 0, 500, k_unit_param_type_percent, 1, 1, 0, {"SPACE"}},
-      {5, 200, 0, 60, k_unit_param_type_sec, 1, 1, 0, {"DECAY"}},          // 0.5 .. 20.0 s
+      {5, 200, 5, 60, k_unit_param_type_sec, 1, 1, 0, {"DECAY"}},          // 0.5 .. 20.0 s
       {0, 1000, 0, 500, k_unit_param_type_percent, 1, 1, 0, {"SUSTAIN"}},
       {0, 1000, 0, 600, k_unit_param_type_percent, 1, 1, 0, {"SENS"}},
       {0, 2, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"CURVE"}},
-      {1500, 12000, 0, 6000, k_unit_param_type_hertz, 0, 0, 0, {"TONE"}},
+      {1500, 12000, 1500, 6000, k_unit_param_type_hertz, 0, 0, 0, {"TONE"}},
       {0, 1000, 0, 0, k_unit_param_type_percent, 1, 1, 0, {"STABILITY"}},
     },
   },
