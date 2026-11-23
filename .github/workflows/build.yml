@@ -56,11 +56,16 @@ jobs:
             -Wall -Wextra -Wdouble-promotion -Werror -I core/hfh -c tools/arm_smoke.cc -o arm_smoke.o
           arm-gcc/bin/arm-none-eabi-size arm_smoke.o
 
-      - name: Desktop DSP test (renders demo WAVs)
+      - name: Desktop DSP tests (render demo WAVs for every effect)
         run: |
-          g++ -O2 -std=c++17 -Wall -Wextra -Werror -I spring-tank -I core/hfh tools/render_demo.cc -o render_demo
           mkdir -p demo
-          ./render_demo demo | tee demo/report.txt
+          INC="-I core/hfh -I tools"
+          for hdr in */header.c; do INC="$INC -I $(dirname "$hdr")"; done
+          for src in tools/render_*.cc; do
+            name=$(basename "$src" .cc)
+            g++ -O2 -std=c++17 -Wall -Wextra -Werror $INC "$src" -o "$name"
+            ./"$name" demo | tee -a demo/report.txt
+          done
           ! grep -q "NaN" demo/report.txt
 
       - name: Build units

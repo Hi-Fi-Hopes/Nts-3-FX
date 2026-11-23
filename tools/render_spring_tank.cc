@@ -1,8 +1,8 @@
 // Desktop listening test for Spring Tank.
 // Runs the exact DSP used on the NTS-3 and writes 48 kHz stereo WAV files.
 //
-//   g++ -O2 -std=c++17 -I spring-tank tools/render_demo.cc -o render_demo
-//   ./render_demo out_dir
+//   g++ -O2 -std=c++17 -I core/hfh -I tools -I spring-tank tools/render_spring_tank.cc -o render_spring_tank
+//   ./render_spring_tank out_dir
 //
 #include "spring_dsp.h"
 

@@ -1,6 +1,6 @@
 # HFH core
 
-The shared DSP library behind every Hi-Fi Hopes NTS-3 effect. Header-only C++11 with no SDK or libm dependencies, so the same code runs on the NTS-3 and on a desktop for testing. Including everything costs about 4 KB of the unit's ~32 KB budget.
+The shared DSP library behind every Hi-Fi Hopes NTS-3 effect. Header-only C++11 with no SDK or libm dependencies, so the same code runs on the NTS-3 and on a desktop for testing. Including everything costs a few KB of the unit's ~32 KB budget.
 
 ```cpp
 #include "hfh.h"   // or individual headers
@@ -10,12 +10,13 @@ The shared DSP library behind every Hi-Fi Hopes NTS-3 effect. Header-only C++11 
 
 | Header | What's in it |
 |---|---|
-| `hfh_math.h` | Fast `fexp2/fexp/flog2/fpow/fsin/ftan/ftanh`, dB conversion, `expMap` for times and frequencies, equal-power crossfade, coefficient helpers |
+| `hfh_math.h` | Fast `fexp2/fexp/flog2/fpow/fsin/ftan/ftanh`, dB conversion, `expMap` for times and frequencies, equal-power crossfade, `softLimit` output safety, coefficient helpers |
 | `hfh_smooth.h` | `Smoother` (one-pole) and `Ramp` (linear, arrives on time) |
 | `hfh_filter.h` | `OnePoleLP/HP`, `DCBlocker`, `Svf` (zero-delay-feedback state-variable filter: LP/HP/BP/notch/peak), `Svf24` (24 dB/oct) |
 | `hfh_delay.h` | `DelayLine` over external memory; linear or Hermite-spline reads; absolute reads for loopers and grains |
 | `hfh_mod.h` | `Rng`, `Drift` (smooth random wander), `Lfo`, `Ramper` (bounce / rise / fall, smooth / linear / square) |
 | `hfh_grain.h` | `windowHann`, `windowTukey`, `ArEnv` |
+| `hfh_reverb.h` | `Haze`: lush 8-line modulated FDN reverb with diffusion, damping, size glide and freeze; decay is accurate in seconds; ~280 KB of SDRAM |
 | `hfh_character.h` | The "factory mods": `Stability` (wow, flutter, hiss, darkening), `Clock` (sample rate as a sound) + `quantizeClock` (musical steps), `TapeSat` |
 
 ## House rules for every effect

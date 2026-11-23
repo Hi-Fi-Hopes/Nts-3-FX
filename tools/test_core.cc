@@ -239,6 +239,49 @@ static void testCharacter() {
   CHECK(err < 0.01, "stability 0 is transparent (%g)", err);
 }
 
+static void testReverb() {
+  static std::vector<float> mem(Haze::kBufferFloats);
+  for (float target : {1.5f, 6.f}) {
+    Haze h;
+    h.init(mem.data());
+    h.setDecay(target);
+    h.setDamping(20000.f);
+    h.setModulation(0.f);
+    // Steady noise in, then silence; measure the -30 dB time of the tail (x2 = RT60).
+    Rng rng;
+    const int n = (int)(fs * (target * 2.f + 2.f));
+    std::vector<float> e(n);
+    for (int i = 0; i < n; ++i) {
+      float x = i < (int)fs ? rng.bipolar() * 0.3f : 0.f, l, r;
+      h.process(x, x, l, r);
+      e[i] = l * l + r * r;
+    }
+    // 50 ms RMS windows after the input stops
+    auto rmsDb = [&](int at) { double s = 0; for (int k = 0; k < 2400; ++k) s += e[at + k]; return 10 * std::log10(s / 2400 + 1e-30); };
+    int start = (int)fs + 4800;
+    double ref = rmsDb(start);
+    int t = start;
+    while (t + 2400 < n && rmsDb(t) > ref - 30.0) t += 480;
+    float rt = 2.f * (t - start) / fs;
+    CHECK(std::fabs(rt / target - 1.f) < 0.25f, "Haze RT60 %.2f s for target %.2f s", rt, target);
+  }
+  // Freeze holds the tail
+  Haze f;
+  f.init(mem.data());
+  f.setDecay(2.f);
+  Rng rng;
+  float l, r;
+  for (int i = 0; i < 48000; ++i) { float x = rng.bipolar() * 0.3f; f.process(x, x, l, r); }
+  f.setFreeze(true);
+  double a = 0, b = 0;
+  for (int i = 0; i < 48000 * 6; ++i) {
+    f.process(rng.bipolar(), rng.bipolar(), l, r);   // input ignored while frozen
+    if (i < 48000) a += l * l; else if (i >= 48000 * 5) b += l * l;
+  }
+  float dropDb = (float)(10 * std::log10(b / a));
+  CHECK(dropDb > -6.f && dropDb < 1.f, "freeze holds the tail (%.1f dB over 5 s)", dropDb);
+}
+
 int main() {
   testMath();
   testSmooth();
@@ -247,6 +290,7 @@ int main() {
   testMod();
   testGrain();
   testCharacter();
+  testReverb();
   printf("%d passed, %d failed\n", g_pass, g_fail);
   return g_fail ? 1 : 0;
 }

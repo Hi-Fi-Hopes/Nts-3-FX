@@ -11,3 +11,4 @@
 #include "hfh_mod.h"
 #include "hfh_grain.h"
 #include "hfh_character.h"
+#include "hfh_reverb.h"

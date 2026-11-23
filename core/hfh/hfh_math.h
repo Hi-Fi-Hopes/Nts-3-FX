@@ -98,6 +98,14 @@ inline float ftanh(float x) {
   return x * (27.f + x2) / (27.f + 9.f * x2);
 }
 
+// Output safety: transparent below 0.8, then rounds off smoothly toward 1.0.
+inline float softLimit(float x) {
+  const float a = absf(x);
+  if (a <= 0.8f) return x;
+  const float y = 0.8f + 0.2f * ftanh((a - 0.8f) * 5.f);
+  return x < 0.f ? -y : y;
+}
+
 // Equal-power crossfade. mix 0 = all dry, 1 = all wet.
 inline void equalPowerGains(float mix, float &dry, float &wet) {
   // sqrt is a single FPU instruction on the Cortex-M7.

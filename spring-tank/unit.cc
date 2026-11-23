@@ -35,7 +35,7 @@
  *  File: unit.cc
  *
  *  NTS-3 kaoss pad kit generic effect unit interface
- *  (KORG template, used unchanged by Spring Tank — Hi-Fi Hopes)
+ *  (KORG template, used unchanged — Hi-Fi Hopes)
  *
  */
 #include "effect.h"
