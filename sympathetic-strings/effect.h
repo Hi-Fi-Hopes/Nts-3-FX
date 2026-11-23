@@ -9,7 +9,7 @@
 
 class Effect : public Processor {
  public:
-  enum { CHORD = 0U, RING, MIX, KEY, SCALE, TONE, DRIFT, STABILITY, NUM_PARAMS };
+  enum { CHORD = 0U, RING, LEVEL, KEY, SCALE, TONE, DRIFT, STABILITY, NUM_PARAMS };
 
   uint32_t getBufferSize() const override final { return sym::SympatheticStrings::kBufferFloats; }
   void init(float *buf) override final { fx_.init(buf); }
@@ -17,9 +17,9 @@ class Effect : public Processor {
 
   void setParameter(uint8_t index, int32_t value) override final {
     switch (index) {
-      case CHORD: fx_.setChord(value); break;
+      case CHORD: fx_.setChordPosition(value); break;      // 0..600, 100 per chord
       case RING: fx_.setRing(value * 0.1f); break;          // 5..300 -> 0.5..30.0 s
-      case MIX: fx_.setMix(value * 0.001f); break;          // 0..1000 -> 0..1
+      case LEVEL: fx_.setLevel(value * 0.001f); break;      // 0..1000 -> 0..1, added to dry
       case KEY: fx_.setKey(value); break;
       case SCALE: fx_.setScale(value); break;
       case TONE: fx_.setTone((float)value); break;          // Hz
@@ -33,7 +33,7 @@ class Effect : public Processor {
     static const char *kKeys[12] = {"C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"};
     static const char *kScales[2] = {"MAJOR", "MINOR"};
     switch (index) {
-      case CHORD: return sym::chordName(fx_.scale(), value);
+      case CHORD: return sym::chordName(fx_.scale(), value / 100 > 6 ? 6 : value / 100);
       case KEY: return (value >= 0 && value < 12) ? kKeys[value] : nullptr;
       case SCALE: return (value >= 0 && value < 2) ? kScales[value] : nullptr;
       default: return nullptr;

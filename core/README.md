@@ -17,6 +17,8 @@ The shared DSP library behind every Hi-Fi Hopes NTS-3 effect. Header-only C++11 
 | `hfh_mod.h` | `Rng`, `Drift` (smooth random wander), `Lfo`, `Ramper` (bounce / rise / fall, smooth / linear / square) |
 | `hfh_grain.h` | `windowHann`, `windowTukey`, `ArEnv` |
 | `hfh_reverb.h` | `Haze`: lush 8-line modulated FDN reverb with diffusion, damping, size glide and freeze; decay is accurate in seconds; ~280 KB of SDRAM |
+| `hfh_pitch.h` | `PitchShifter`: two crossfading taps; ideal inside reverb feedback (shimmer) |
+| `hfh_granular.h` | `GrainCloud` (16 grain voices over a record buffer, never overtaking the record head) and `GrainScheduler` (jittered random timing) |
 | `hfh_character.h` | The "factory mods": `Stability` (wow, flutter, hiss, darkening), `Clock` (sample rate as a sound) + `quantizeClock` (musical steps), `TapeSat` |
 
 ## House rules for every effect

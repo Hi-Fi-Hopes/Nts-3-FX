@@ -12,6 +12,11 @@
  *
  *  Chords: 7 dreamy voicings per key (major or minor). Changing chord re-tunes
  *  the strings with a short glide, so ringing strings slide into the new chord.
+ *
+ *  The dry sound always passes at full level and the strings are added on top,
+ *  like a real instrument's sympathetic strings. (v1.0.2 crossfaded dry
+ *  against strings, so with the strings out of key the output went nearly
+ *  silent.)
  */
 
 #include "hfh.h"
@@ -115,7 +120,16 @@ class SympatheticStrings {
   void setScale(int s) { s = s ? 1 : 0; if (s != scale_) { scale_ = s; retuneNeeded_ = true; } }
   void setRing(float sec) { ring_ = clampf(sec, 0.5f, 30.f); loopDirty_ = true; }
   void setTone(float hz) { tone_ = clampf(hz, 800.f, 12000.f); loopDirty_ = true; }
-  void setMix(float m) { mix_.setTarget(clampf(m, 0.f, 1.f)); }
+  // How loud the strings are, added on top of the untouched dry signal.
+  void setLevel(float m) { mix_.setTarget(clampf(m, 0.f, 1.f)); }
+  // Fine-grained chord position 0..600 with hysteresis, so a finger resting
+  // near a zone edge doesn't flip chords back and forth and smear the strings.
+  void setChordPosition(int v) {
+    const int zone = v / 100 > kChords - 1 ? kChords - 1 : v / 100;
+    if (zone == chord_) return;
+    const int edge = zone > chord_ ? zone * 100 : (zone + 1) * 100;
+    if (v - edge > 15 || edge - v > 15) setChord(zone);
+  }
   void setDrift(float d) { detune_ = clampf(d, 0.f, 1.f) * 12.f; }   // up to +/-12 cents
   void setStability(float s) { stab_.setAmount(s); }
   int scale() const { return scale_; }
@@ -141,10 +155,9 @@ class SympatheticStrings {
       wl = ftanh(wl * 0.5f);
       wr = ftanh(wr * 0.5f);
       stab_.process(wl, wr);
-      float dry, wet;
-      equalPowerGains(mix_.next(), dry, wet);
-      out[2 * i] = dry * inL + wet * wl;
-      out[2 * i + 1] = dry * inR + wet * wr;
+      const float lvl = mix_.next() * 1.6f;
+      out[2 * i] = softLimit(inL + lvl * wl);
+      out[2 * i + 1] = softLimit(inR + lvl * wr);
     }
   }
 

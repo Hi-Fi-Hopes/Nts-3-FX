@@ -282,6 +282,50 @@ static void testReverb() {
   CHECK(dropDb > -6.f && dropDb < 1.f, "freeze holds the tail (%.1f dB over 5 s)", dropDb);
 }
 
+// Estimate the dominant frequency by counting upward zero crossings.
+static float zcFreq(const std::vector<float> &v, int from, int to) {
+  int c = 0;
+  for (int i = from + 1; i < to; ++i) if (v[i - 1] < 0 && v[i] >= 0) ++c;
+  return c * fs / (to - from);
+}
+
+static void testPitchAndGrains() {
+  static std::vector<float> mem(PitchShifter::kBufferFloats);
+  for (float st : {12.f, 7.f, -12.f}) {
+    PitchShifter ps;
+    ps.init(mem.data());
+    ps.setSemitones(st);
+    std::vector<float> out(48000);
+    for (int i = 0; i < 48000; ++i) out[i] = ps.process(std::sin(2 * M_PI * 300.0 * i / fs));
+    float f = zcFreq(out, 9600, 48000), want = 300.f * std::pow(2.f, st / 12.f);
+    CHECK(std::fabs(f / want - 1.f) < 0.03f, "pitch shift %+.0f st: %.1f Hz (want %.1f)", st, f, want);
+  }
+
+  static std::vector<float> buf(1 << 16);
+  DelayLine src;
+  src.init(buf.data(), 1 << 16);
+  for (int i = 0; i < 30000; ++i) src.write(std::sin(2 * M_PI * 400.0 * i / fs));
+  GrainCloud cloud;
+  cloud.init(&src);
+  cloud.setTaper(1.f);
+  GrainSpec s{2000.f, 2.f, 9600.f, 0.5f, 1.f};
+  CHECK(cloud.spawn(s), "grain spawns");
+  std::vector<float> out(9600);
+  for (int i = 0; i < 9600; ++i) { float l, r; cloud.process(l, r); out[i] = l; src.write(std::sin(2 * M_PI * 400.0 * (30000 + i) / fs)); }
+  float f = zcFreq(out, 2000, 7600);
+  CHECK(std::fabs(f / 800.f - 1.f) < 0.03f, "grain at 2x plays an octave up: %.1f Hz", f);
+  CHECK(cloud.activeCount() == 0, "grain finishes after its length");
+  CHECK(std::fabs(out[0]) < 1e-3f && std::fabs(out[9599]) < 2e-3f, "grain starts and ends silent");
+  for (int i = 0; i < 20; ++i) cloud.spawn(s);
+  CHECK(cloud.activeCount() == GrainCloud::kMaxGrains, "voice limit respected");
+
+  GrainScheduler sch(3);
+  sch.setDensity(10.f);
+  int n = 0;
+  for (int i = 0; i < 48000 * 10; ++i) n += sch.tick() ? 1 : 0;
+  CHECK(n > 85 && n < 115, "scheduler density ~10/s (%d in 10 s)", n);
+}
+
 int main() {
   testMath();
   testSmooth();
@@ -291,6 +335,7 @@ int main() {
   testGrain();
   testCharacter();
   testReverb();
+  testPitchAndGrains();
   printf("%d passed, %d failed\n", g_pass, g_fail);
   return g_fail ? 1 : 0;
 }

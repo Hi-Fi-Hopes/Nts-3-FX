@@ -12,3 +12,5 @@
 #include "hfh_grain.h"
 #include "hfh_character.h"
 #include "hfh_reverb.h"
+#include "hfh_pitch.h"
+#include "hfh_granular.h"

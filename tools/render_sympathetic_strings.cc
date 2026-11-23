@@ -9,7 +9,7 @@ static Buf run(const Buf &in, int key, int scale, std::vector<std::pair<float, i
   static std::vector<float> mem(sym::SympatheticStrings::kBufferFloats);
   static sym::SympatheticStrings fx;
   fx.init(mem.data());
-  fx.setKey(key); fx.setScale(scale); fx.setRing(ring); fx.setMix(mix);
+  fx.setKey(key); fx.setScale(scale); fx.setRing(ring); fx.setLevel(mix);
   fx.setTone(5000.f); fx.setDrift(drift); fx.setStability(stability);
   fx.setChord(chords[0].second);
   Buf out(in.size());

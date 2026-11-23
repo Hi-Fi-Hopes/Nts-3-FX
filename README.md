@@ -35,9 +35,9 @@ Twelve tuned strings that ring along with whatever you play, like a sitar's symp
 
 | Control | Parameter | What it does |
 |---|---|---|
-| Pad X | **CHORD** | 7 dreamy voicings in the key (major: I maj9, ii m9, iii m7, IV maj9, V sus, vi m9, I open; minor: i m9, bIII maj7, iv m9, bVI maj9, bVII add9, v m7, i open) |
+| Pad X | **CHORD** | 7 dreamy voicings in the key, with hysteresis so a resting finger doesn't flicker between chords (major: I maj9, ii m9, iii m7, IV maj9, V sus, vi m9, I open; minor: i m9, bIII maj7, iv m9, bVI maj9, bVII add9, v m7, i open) |
 | Pad Y | **RING** | 0.5 – 30 s |
-| Depth | **MIX** | Dry → strings |
+| Depth | **STRINGS** | Strings level, added on top of the untouched dry sound |
 | Editor | **KEY** / **SCALE** | Root note, major or minor |
 | Editor | **TONE** | String brightness, 800 Hz – 12 kHz |
 | Editor | **DRIFT** | Slow random detune between strings, up to ±12 cents (chorus shimmer) |
@@ -57,6 +57,39 @@ Removes the attack from every note and swells it in, then into a soft, slowly mo
 | Editor | **CURVE** | SOFT (S-curve), LINEAR, LATE (blooms at the end) |
 | Editor | **TONE** | Reverb brightness, 1.5 – 12 kHz |
 | Editor | **STABILITY** | Tape wow, flutter, hiss and darkening |
+
+### Memory Fog (`memory-fog/`)
+
+A delay where every repeat is older than the last. Each pass through the loop is darkened, thinned, run at a lower sample rate, saturated and hissed, so the damage compounds: the first echo is nearly clean and the tail dissolves into fog. Moving TIME glides the pitch like a tape machine changing speed.
+
+| Control | Parameter | What it does |
+|---|---|---|
+| Pad X | **TIME** | 20 ms – 1.3 s |
+| Pad Y | **AGE** | How much damage each repeat takes |
+| Depth | **FEEDBACK** | Number of repeats; 100% is self-sustaining (held by saturation) |
+| Editor | **MIX**, **SPREAD** (ping-pong), **WARBLE** (wow/flutter), **HISS**, **TONE** | |
+
+### Aurora (`aurora/`)
+
+A shimmer reverb whose shimmer follows a chord. Two pitch voices re-pitch the reverb's own output and feed it back in, so the tail blooms into chord tones rather than a plain octave stack.
+
+| Control | Parameter | What it does |
+|---|---|---|
+| Pad X | **CHORD** | Octave, Fifth, Oct 5th, 2 Octaves, 5th 9th, Major, Minor, Sub Oct |
+| Pad Y | **BLOOM** | How much shimmer feeds back |
+| Depth | **DECAY** | 1 – 30 s |
+| Editor | **MIX**, **TONE**, **MOD** (tail movement), **SIZE**, **STABILITY** | |
+
+### Constellation (`constellation/`)
+
+Tiny pitched-up grains of what you play, scattered across the stereo field like stars and softened in a short reverb. The dry sound passes untouched; the sparkles are added on top.
+
+| Control | Parameter | What it does |
+|---|---|---|
+| Pad X | **DENSITY** | 0.5 – 40 grains per second |
+| Pad Y | **HEIGHT** | Pitch sets: Unison Oct, Octave, Oct 5th, Oct 5th 2Oct, High |
+| Depth | **SPARKLE** | Sparkle level |
+| Editor | **SIZE** (grain length), **SCATTER** (how far back grains reach), **REVERSE**, **SPACE**, **TONE** | |
 
 ## Listening without the hardware
 
@@ -78,4 +111,4 @@ The CI run uploads these as the **demo-audio** artifact.
 - `core/hfh/`: the shared HFH core DSP library (see `core/README.md`)
 - The Makefile comes from Korg's template at build time.
 
-Developer ID `0x48464850` ('HFHP'). Unit IDs: 1 = Spring Tank, 2 = Sympathetic Strings, 3 = Bloom.
+Developer ID `0x48464850` ('HFHP'). Unit IDs: 1 = Spring Tank, 2 = Sympathetic Strings, 3 = Bloom, 4 = Memory Fog, 5 = Aurora, 6 = Constellation.
