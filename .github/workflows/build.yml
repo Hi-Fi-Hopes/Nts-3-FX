@@ -1,0 +1,94 @@
+name: Build NTS-3 units
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  # Korg logue SDK, pinned so builds don't change under us.
+  LOGUE_SDK_REF: e78b16c6068b1c30fc072f2aebb8da5eef6c005c
+  # GCC 10.3 for ARM (same compiler version Korg specifies for the NTS-3).
+  GCC_URL: https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v10.3.1-2.3/xpack-arm-none-eabi-gcc-10.3.1-2.3-linux-x64.tar.gz
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Korg logue SDK
+        run: |
+          git init -q logue-sdk
+          cd logue-sdk
+          git remote add origin https://github.com/korginc/logue-sdk
+          git fetch -q --depth 1 origin "$LOGUE_SDK_REF"
+          git checkout -q FETCH_HEAD
+          git submodule update --init --depth 1 platform/ext/CMSIS
+
+      - name: Cache ARM compiler
+        id: gcc-cache
+        uses: actions/cache@v4
+        with:
+          path: arm-gcc
+          key: xpack-arm-none-eabi-gcc-10.3.1-2.3
+
+      - name: Get ARM compiler
+        if: steps.gcc-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p arm-gcc
+          curl -sSL "$GCC_URL" | tar xz -C arm-gcc --strip-components=1
+
+      - name: Desktop DSP test (renders demo WAVs)
+        run: |
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror -I spring-tank tools/render_demo.cc -o render_demo
+          mkdir -p demo
+          ./render_demo demo | tee demo/report.txt
+          ! grep -q "NaN" demo/report.txt
+
+      - name: Build units
+        run: |
+          set -e
+          mkdir -p dist
+          GCC_BIN="$PWD/arm-gcc/bin"
+          for hdr in */header.c; do
+            unit=$(dirname "$hdr")
+            dst="logue-sdk/platform/nts-3_kaoss/$unit"
+            rm -rf "$dst"
+            cp -r "$unit" "$dst"
+            cp logue-sdk/platform/nts-3_kaoss/dummy-genericfx/Makefile "$dst/"
+            make -C "$dst" GCC_BIN_PATH="$GCC_BIN"
+            make -C "$dst" install GCC_BIN_PATH="$GCC_BIN"
+            for f in "$dst"/*.nts3unit; do
+              "$GCC_BIN/arm-none-eabi-size" "$f"
+              size=$(stat -c%s "$f")
+              echo "$f: $size bytes"
+              # The NTS-3 accepts units up to ~32 KB.
+              if [ "$size" -gt 32768 ]; then echo "::error::$f is over 32 KB"; exit 1; fi
+              cp "$f" dist/
+            done
+          done
+          ls -la dist
+
+      - name: Upload units
+        uses: actions/upload-artifact@v4
+        with:
+          name: nts3-units
+          path: dist/*.nts3unit
+
+      - name: Upload demo audio
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-audio
+          path: demo/
+
+      - name: Publish release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.nts3unit

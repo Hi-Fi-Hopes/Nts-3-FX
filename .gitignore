@@ -1,0 +1,4 @@
+build/
+*.nts3unit
+/render_demo
+*.wav
