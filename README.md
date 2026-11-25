@@ -91,6 +91,37 @@ Tiny pitched-up grains of what you play, scattered across the stereo field like 
 | Depth | **SPARKLE** | Sparkle level |
 | Editor | **SIZE** (grain length), **SCATTER** (how far back grains reach), **REVERSE**, **SPACE**, **TONE** | |
 
+### Supermassive (`supermassive/`)
+
+A huge, slowly moving reverb to dance around in space and time, in the spirit of Valhalla's big modulated spaces. An 8-line feedback delay network with size-scaled diffusion runs at half sample rate, so it fits rooms far bigger than Haze in the same memory. Decays run up to 99 s, and the top of the pad freezes the tail.
+
+| Control | Parameter | What it does |
+|---|---|---|
+| Pad X | **SIZE** | Chamber → supermassive (lines 16 – 330 ms); pre-delay grows with it (0 – 120 ms) |
+| Pad Y | **DECAY** | 1 – 99 s; the top edge **freezes** the tail (input muted, holds forever) |
+| Depth | **MIX** | Dry → wet |
+| Editor | **TONE** | Shelf corner, 800 Hz – 10 kHz: above it the tail dies sooner |
+| Editor | **SHIMMER** | Octave-up bloom in the feedback, level-controlled so it can't run away |
+| Editor | **MOD** | Tail movement |
+| Editor | **WARP** | How fast SIZE glides (20 ms – 5 s); fast glides bend the whole tail's pitch |
+| Editor | **STABILITY** | Tape wow, flutter, hiss and darkening |
+
+Built in: **redshift** (longer decays darken the tail) and **gravity** (longer decays slow the modulation).
+
+### Glass Bells (`glass-bells/`)
+
+A bell synth you play on the pad, like the NTS-3's own playable programs. Touch to strike; slide to a new note to strike it. Bells ring on after you lift, into a built-in reverb, and play on top of whatever comes into the NTS-3. Each voice is two-operator FM (the classic DX bell), 8 voices.
+
+| Control | Parameter | What it does |
+|---|---|---|
+| Pad X | **NOTE** | Two octaves of the scale, so every note fits; shows the note name |
+| Pad Y | **TONE** | Soft celesta → glass → sparkle (set when each bell is struck) |
+| Depth | **LEVEL** | Bell level on top of the input |
+| Editor | **KEY** / **SCALE** | Root (C4 – B4) and Penta Maj, Penta Min, Major, Minor, Lydian, Dorian |
+| Editor | **RING** | 0.5 – 30 s |
+| Editor | **SPACE** | Reverb amount (more space also lengthens the hall) |
+| Editor | **REPEAT** | Mallet roll while you hold, up to 12 Hz; 0 = off |
+
 ## Listening without the hardware
 
 `tools/render_<effect>.cc` runs the exact same DSP on a computer and writes WAV files, using bells, pads and test signals from `tools/demo_signals.h`:
@@ -111,4 +142,4 @@ The CI run uploads these as the **demo-audio** artifact.
 - `core/hfh/`: the shared HFH core DSP library (see `core/README.md`)
 - The Makefile comes from Korg's template at build time.
 
-Developer ID `0x48464850` ('HFHP'). Unit IDs: 1 = Spring Tank, 2 = Sympathetic Strings, 3 = Bloom, 4 = Memory Fog, 5 = Aurora, 6 = Constellation.
+Developer ID `0x48464850` ('HFHP'). Unit IDs: 1 = Spring Tank, 2 = Sympathetic Strings, 3 = Bloom, 4 = Memory Fog, 5 = Aurora, 6 = Constellation, 7 = Supermassive, 8 = Glass Bells.
